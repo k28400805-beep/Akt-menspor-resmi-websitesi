@@ -1,68 +1,23 @@
-// ===============================
-// AKTÜMENSPOR OFFICIAL WEBSITE
-// script.js
-// ===============================
+/* ==========================================
+   AKTÜMENSPOR OFFICIAL WEBSITE
+   JavaScript
+========================================== */
 
-// Navbar Scroll Efekti
-const header = document.querySelector(".header");
+// Sayfa tamamen yüklendiğinde
 
-window.addEventListener("scroll", () => {
-    if (window.scrollY > 50) {
-        header.style.background = "rgba(8,8,8,.95)";
-        header.style.padding = "2px 0";
-    } else {
-        header.style.background = "rgba(0,0,0,.45)";
-        header.style.padding = "0";
-    }
-});
+document.addEventListener("DOMContentLoaded", () => {
 
-// Sayfa Yüklenme Animasyonu
-window.addEventListener("load", () => {
-    document.body.style.opacity = "1";
-});
+    // Aktif menü
 
-// İstatistik Sayaçları
-const stats = document.querySelectorAll(".stat h2");
+    const currentPage = window.location.pathname.split("/").pop();
 
-const hedefler = [2018, 12, 28, 126];
+    document.querySelectorAll(".nav-links a").forEach(link => {
 
-stats.forEach((item, index) => {
+        const href = link.getAttribute("href");
 
-    let sayi = 0;
+        if(href && href.includes(currentPage)){
 
-    const hedef = hedefler[index];
-
-    const interval = setInterval(() => {
-
-        sayi += Math.ceil(hedef / 70);
-
-        if (sayi >= hedef) {
-
-            sayi = hedef;
-
-            clearInterval(interval);
-
-        }
-
-        item.innerHTML = sayi;
-
-    }, 25);
-
-});
-
-// Scroll Reveal
-const reveal = document.querySelectorAll("section");
-
-window.addEventListener("scroll", () => {
-
-    reveal.forEach(sec => {
-
-        const top = sec.getBoundingClientRect().top;
-
-        if (top < window.innerHeight - 100) {
-
-            sec.style.opacity = "1";
-            sec.style.transform = "translateY(0px)";
+            link.classList.add("active");
 
         }
 
@@ -70,51 +25,34 @@ window.addEventListener("scroll", () => {
 
 });
 
-reveal.forEach(sec => {
 
-    sec.style.opacity = "0";
-    sec.style.transform = "translateY(60px)";
-    sec.style.transition = ".8s";
+/* ===============================
+   Yukarı Çık Butonu
+================================ */
 
-});
+const topButton = document.createElement("button");
 
-// Yukarı Çık Butonu
+topButton.innerHTML = "↑";
 
-const up = document.createElement("button");
+topButton.className = "top-btn";
 
-up.innerHTML = "↑";
+document.body.appendChild(topButton);
 
-document.body.appendChild(up);
+window.addEventListener("scroll",()=>{
 
-up.style.position = "fixed";
-up.style.right = "25px";
-up.style.bottom = "25px";
-up.style.width = "55px";
-up.style.height = "55px";
-up.style.borderRadius = "50%";
-up.style.border = "none";
-up.style.background = "#c3002f";
-up.style.color = "white";
-up.style.fontSize = "22px";
-up.style.cursor = "pointer";
-up.style.display = "none";
-up.style.zIndex = "999";
+    if(window.scrollY>350){
 
-window.addEventListener("scroll", () => {
+        topButton.classList.add("show");
 
-    if (window.scrollY > 500) {
+    }else{
 
-        up.style.display = "block";
-
-    } else {
-
-        up.style.display = "none";
+        topButton.classList.remove("show");
 
     }
 
 });
 
-up.onclick = () => {
+topButton.addEventListener("click",()=>{
 
     window.scrollTo({
 
@@ -124,40 +62,172 @@ up.onclick = () => {
 
     });
 
-};
+});
 
-// Hero Yazı Animasyonu
 
-const heroTitle = document.querySelector(".hero h1");
+/* ===============================
+   Fade Animasyonu
+================================ */
 
-if(heroTitle){
+const observer = new IntersectionObserver(entries=>{
 
-    heroTitle.animate([
+    entries.forEach(entry=>{
 
-        {
+        if(entry.isIntersecting){
 
-            opacity:0,
-
-            transform:"translateY(50px)"
-
-        },
-
-        {
-
-            opacity:1,
-
-            transform:"translateY(0)"
+            entry.target.classList.add("show-animation");
 
         }
 
-    ],{
+    });
 
-        duration:1200,
+},{
+    threshold:.15
+});
 
-        easing:"ease"
+document.querySelectorAll(
+
+".player-card,.news-card,.product-card,.gallery-item,.info-card,.stat"
+
+).forEach(el=>{
+
+    observer.observe(el);
+
+});
+/* ==========================================
+   Sayaç Animasyonu
+========================================== */
+
+const counters = document.querySelectorAll(".stat h2");
+
+const animateCounter = (counter) => {
+
+    const target = parseInt(counter.innerText.replace(/\D/g, "")) || 0;
+
+    if (target === 0) return;
+
+    let current = 0;
+
+    const increment = Math.max(1, Math.ceil(target / 100));
+
+    const update = () => {
+
+        current += increment;
+
+        if (current >= target) {
+
+            counter.innerText = target.toLocaleString("tr-TR");
+
+            return;
+
+        }
+
+        counter.innerText = current.toLocaleString("tr-TR");
+
+        requestAnimationFrame(update);
+
+    };
+
+    update();
+
+};
+
+const counterObserver = new IntersectionObserver(entries => {
+
+    entries.forEach(entry => {
+
+        if (entry.isIntersecting) {
+
+            animateCounter(entry.target);
+
+            counterObserver.unobserve(entry.target);
+
+        }
 
     });
 
-}
+}, {
 
-console.log("Aktümenspor Web Sitesi Hazır!");
+    threshold: 0.5
+
+});
+
+counters.forEach(counter => {
+
+    counterObserver.observe(counter);
+
+});
+
+
+/* ==========================================
+   Navbar Scroll Efekti
+========================================== */
+
+const header = document.querySelector(".header");
+
+window.addEventListener("scroll", () => {
+
+    if (window.scrollY > 50) {
+
+        header.classList.add("scrolled");
+
+    } else {
+
+        header.classList.remove("scrolled");
+
+    }
+
+});
+
+
+/* ==========================================
+   Buton Ripple Efekti
+========================================== */
+
+document.querySelectorAll("button").forEach(button => {
+
+    button.addEventListener("click", function (e) {
+
+        const circle = document.createElement("span");
+
+        const diameter = Math.max(this.clientWidth, this.clientHeight);
+
+        circle.style.width = circle.style.height = diameter + "px";
+
+        circle.classList.add("ripple");
+
+        circle.style.left = e.offsetX - diameter / 2 + "px";
+
+        circle.style.top = e.offsetY - diameter / 2 + "px";
+
+        const ripple = this.querySelector(".ripple");
+
+        if (ripple) ripple.remove();
+
+        this.appendChild(circle);
+
+    });
+
+});
+
+
+/* ==========================================
+   Loader
+========================================== */
+
+window.addEventListener("load", () => {
+
+    document.body.classList.add("loaded");
+
+});
+
+
+/* ==========================================
+   Konsol Mesajı
+========================================== */
+
+console.log("%cAKTÜMENSPOR", "font-size:32px;color:#c8102e;font-weight:bold;");
+
+console.log("%cResmî Kulüp Web Sitesi", "font-size:18px;color:#444;");
+
+console.log("%cBir Arma. Bir Mücadele. Bir Gelecek.", "font-size:15px;color:#777;");
